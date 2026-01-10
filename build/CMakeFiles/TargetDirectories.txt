@@ -1,7 +1,0 @@
-C:/Users/Martin/Desktop/veggen/build/CMakeFiles/Veggen.dir
-C:/Users/Martin/Desktop/veggen/build/CMakeFiles/run.dir
-C:/Users/Martin/Desktop/veggen/build/CMakeFiles/ALL_BUILD.dir
-C:/Users/Martin/Desktop/veggen/build/CMakeFiles/ZERO_CHECK.dir
-C:/Users/Martin/Desktop/veggen/build/external/glfw/CMakeFiles/ALL_BUILD.dir
-C:/Users/Martin/Desktop/veggen/build/external/glfw/src/CMakeFiles/glfw.dir
-C:/Users/Martin/Desktop/veggen/build/external/glfw/src/CMakeFiles/update_mappings.dir
