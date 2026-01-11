@@ -23,9 +23,14 @@ set(GLFW_INSTALL OFF CACHE BOOL "Generate installation target" FORCE)
 
 add_subdirectory(external/glfw)
 
-# ============================================================
+# Add GLAD
+add_library(glad STATIC external/glad/src/glad.c)
+
+target_include_directories(glad PUBLIC 
+    external/glad/include
+)
+
 # OpenGL (system dependency)
-# ============================================================
 find_package(OpenGL REQUIRED)
 
 if(NOT OPENGL_FOUND)
@@ -56,6 +61,7 @@ target_include_directories(Veggen PRIVATE
 
 # Link all external built targets
 target_link_libraries(Veggen PRIVATE
+    glad
     glfw
     ${OPENGL_LIBRARIES}
 )
