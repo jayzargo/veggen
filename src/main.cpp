@@ -2,12 +2,28 @@
 #include <GLFW/glfw3.h>
 
 #include <iostream>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
 
 void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 
 
 int main() {
+
+    // GLM Test
+    glm::vec3 position(1.0f, 2.0f, 3.0f);
+    std::cout << "Position: " << position.x << ", "
+        << position.y << ", " << position.z << std::endl;
+
+    glm::mat4 matrix = glm::mat4(1.0f);
+    std::cout << "Matrix created successfully!" << std::endl;
+
+    glm::mat4 transform = glm::translate(matrix, glm::vec3(1.0f, 0.0f, 0.0f));
+    std::cout << "GLM works!" << std::endl;
+
+
     // Test GLFW
     if (!glfwInit()) {
         std::cerr << "Failed to initialize GLFW\n";

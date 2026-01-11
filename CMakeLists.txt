@@ -24,11 +24,21 @@ set(GLFW_INSTALL OFF CACHE BOOL "Generate installation target" FORCE)
 add_subdirectory(external/glfw)
 
 # Add GLAD
+message(STATUS "Adding GLAD files...")
+
 add_library(glad STATIC external/glad/src/glad.c)
 
 target_include_directories(glad PUBLIC 
     external/glad/include
 )
+
+# GLM 
+message(STATUS "Configuring GLM...")
+
+set(GLM_BUILD_TESTS OFF CACHE BOOL "Build the GLM tests" FORCE)
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build the GLM tests" FORCE)
+
+add_subdirectory(external/glm)
 
 # OpenGL (system dependency)
 find_package(OpenGL REQUIRED)
@@ -45,7 +55,7 @@ set(SOURCES
 )
 
 # Add include/header.h
-#set(HEADERS )
+#set(HEADERS )ci
 
 # Veggen application
 add_executable(Veggen 
@@ -56,13 +66,13 @@ add_executable(Veggen
 # Include directories for compiler
 target_include_directories(Veggen PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
-    ${CMAKE_CURRENT_SOURCE_DIR}/external/glfw/include
 )
 
 # Link all external built targets
 target_link_libraries(Veggen PRIVATE
     glad
     glfw
+    glm::glm
     ${OPENGL_LIBRARIES}
 )
 
