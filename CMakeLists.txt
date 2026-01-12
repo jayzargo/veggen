@@ -32,6 +32,23 @@ target_include_directories(glad PUBLIC
     external/glad/include
 )
 
+# Add ImGui
+message(STATUS "Adding Dear ImGui files...")
+
+# Aby sme nemuseli
+#     external/imgui/imgui.cpp
+#     external/imgui/imgui_demo.cpp
+#     external/imgui/imgui_draw.cpp... atd
+
+file(GLOB IMGUI_SRC
+    external/imgui/*.cpp
+)
+
+set(IMGUI_SRC_GLFW_OGL 
+    external/imgui/backends/imgui_impl_opengl3.cpp
+    external/imgui/backends/imgui_impl_glfw.cpp
+)
+
 # GLM 
 message(STATUS "Configuring GLM...")
 
@@ -55,17 +72,21 @@ set(SOURCES
 )
 
 # Add include/header.h
-#set(HEADERS )ci
+#set(HEADERS )
 
 # Veggen application
 add_executable(Veggen 
     ${SOURCES}
+    ${IMGUI_SRC}
+    ${IMGUI_SRC_GLFW_OGL}
     #${HEADERS}    
 )
 
 # Include directories for compiler
 target_include_directories(Veggen PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/external/imgui
+    ${CMAKE_CURRENT_SOURCE_DIR}/external/imgui/backends
 )
 
 # Link all external built targets
