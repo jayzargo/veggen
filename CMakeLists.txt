@@ -44,9 +44,19 @@ file(GLOB IMGUI_SRC
     external/imgui/*.cpp
 )
 
+file(GLOB IMGUI_HEADERS
+    external/imgui/*.h
+)
+
 set(IMGUI_SRC_GLFW_OGL 
     external/imgui/backends/imgui_impl_opengl3.cpp
     external/imgui/backends/imgui_impl_glfw.cpp
+)
+
+set(IMGUI_HEADERS_GLFW_OGL 
+    external/imgui/backends/imgui_impl_opengl3.h
+    external/imgui/backends/imgui_impl_glfw.h
+    external/imgui/backends/imgui_impl_opengl3_loader.h
 )
 
 # GLM 
@@ -71,16 +81,23 @@ set(SOURCES
     src/main.cpp
 )
 
-# Add include/header.h
-#set(HEADERS )
-
 # Veggen application
 add_executable(Veggen 
     ${SOURCES}
     ${IMGUI_SRC}
     ${IMGUI_SRC_GLFW_OGL}
-    #${HEADERS}    
+    ${IMGUI_HEADERS}
+    ${IMGUI_HEADERS_GLFW_OGL}
 )
+
+# VS Filters
+source_group("Source Files" FILES ${SOURCES})
+source_group("Source Files\\ImGui" FILES ${IMGUI_SRC})
+source_group("Source Files\\ImGui\\Backends" FILES ${IMGUI_SRC_GLFW_OGL})
+
+#source_group("Header Files" FILES ${HEADERS})
+source_group("Header Files\\ImGui" FILES ${IMGUI_HEADERS})
+source_group("Header Files\\ImGui\\Backends" FILES ${IMGUI_HEADERS_GLFW_OGL})
 
 # Include directories for compiler
 target_include_directories(Veggen PRIVATE
