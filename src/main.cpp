@@ -75,6 +75,7 @@ int main() {
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
     io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+    //io.IniFilename = NULL;
 
     // Setup Platform/Renderer bindings
     ImGui_ImplGlfw_InitForOpenGL(window, true);
@@ -110,10 +111,13 @@ int main() {
 
         // Dockspace init and creation
         ImGuiViewport* viewport = ImGui::GetMainViewport();
+
         ImGui::SetNextWindowPos(viewport->Pos);
         ImGui::SetNextWindowSize(viewport->Size);
         ImGui::SetNextWindowViewport(viewport->ID);
 
+
+        // 'Virtualne' dockovacie okno/widget - nastavenia
         ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar
             | ImGuiWindowFlags_NoDocking
             | ImGuiWindowFlags_NoTitleBar
@@ -148,7 +152,6 @@ int main() {
             ImGui::EndMenuBar();
         }
 
-        // Dockspace - miesto pre dokovanie okien
         ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
         ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_None);
 
@@ -171,7 +174,7 @@ int main() {
         ImGui::Begin("Viewport");
 
         ImVec2 viewportSize = ImGui::GetContentRegionAvail();
-        printf("ImGui viewport x:%d y:%d\n", (int) viewportSize.x,(int) viewportSize.y);
+        //printf("ImGui viewport x:%d y:%d\n", (int) viewportSize.x,(int) viewportSize.y);
 
 
         // Render 3D here
