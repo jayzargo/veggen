@@ -84,6 +84,9 @@ int main() {
 
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
+    // Dorob: vytvor framebuffer
+
+
     // Render loop
     while (!glfwWindowShouldClose(window))
     {
@@ -151,11 +154,16 @@ int main() {
 
         ImGui::End();
 
-        // Dockable imgui widget
-        ImGui::Begin("Scene");
+        // Dockable imgui widgets
+        ImGui::Begin("Scene 1");
         ImGui::Text("GameObject 1");
         ImGui::Text("GameObject 2");
         ImGui::Text("GameObject 3");
+        ImGui::End();
+        
+        ImGui::Begin("Scene 2");
+        ImGui::Text("GameObject 1");
+        ImGui::Text("GameObject 2");
         ImGui::End();
 
         // Viewport panel
@@ -163,12 +171,37 @@ int main() {
         ImGui::Begin("Viewport");
 
         ImVec2 viewportSize = ImGui::GetContentRegionAvail();
-        
+        printf("ImGui viewport x:%d y:%d\n", (int) viewportSize.x,(int) viewportSize.y);
+
+
         // Render 3D here
         // 1. Render scene do framebuffer texture
         // 2. Display texture v ImGui:
         // ImGui::Image((void*)(intptr_t)textureID, viewportSize);
 
+
+        /* 
+        Nieco na styl:
+
+        glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+        glViewport(0, 0, (int)viewportSize.x, (int)viewportSize.y);
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        RenderSomeObject();
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        
+        Zobraz texturu do viewport:
+
+        ImGui::Image(
+        (void*)(intptr_t)textureColorBuffer,
+            viewportSize,
+            ImVec2(0, 1),  // UV0 (flip Y)
+            ImVec2(1, 0)   // UV1 (flip Y)
+        );
+        
+        */
 
         ImGui::End();
         ImGui::PopStyleVar();
