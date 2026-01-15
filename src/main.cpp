@@ -86,7 +86,33 @@ int main() {
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     // Dorob: vytvor framebuffer
+    GLuint main_viewport_fbo;
+    GLuint main_viewport_tex;
+    GLuint main_viewport_rbo;
 
+
+    glGenFramebuffers(1, &main_viewport_fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, main_viewport_fbo);
+
+    glGenTextures(1, &main_viewport_tex);
+    glBindTexture(GL_TEXTURE_2D, main_viewport_tex);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1280, 720, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, main_viewport_tex, 0);
+
+
+    glGenRenderbuffers(1, &main_viewport_rbo);
+    glBindRenderbuffer(GL_RENDERBUFFER, main_viewport_rbo);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 1280, 720);
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, main_viewport_rbo);
+
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+    }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     // Render loop
     while (!glfwWindowShouldClose(window))
@@ -173,38 +199,36 @@ int main() {
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
         ImGui::Begin("Viewport");
 
+        static ImVec2 lastSize = ImVec2(0, 0);
         ImVec2 viewportSize = ImGui::GetContentRegionAvail();
         //printf("ImGui viewport x:%d y:%d\n", (int) viewportSize.x,(int) viewportSize.y);
 
+        if ((int)viewportSize.x != (int)lastSize.x || (int)viewportSize.y != (int)lastSize.y) {
+            printf("resized x %d y %d\n", (int)viewportSize.x, (int)viewportSize.y);
 
-        // Render 3D here
-        // 1. Render scene do framebuffer texture
-        // 2. Display texture v ImGui:
-        // ImGui::Image((void*)(intptr_t)textureID, viewportSize);
+            glBindTexture(GL_TEXTURE_2D, main_viewport_tex);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, (int)viewportSize.x, (int)viewportSize.y, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+            glBindTexture(GL_TEXTURE_2D, 0);
+
+            glBindRenderbuffer(GL_RENDERBUFFER, main_viewport_rbo);
+            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, (int)viewportSize.x, (int)viewportSize.y);
+            glBindRenderbuffer(GL_RENDERBUFFER, 0);
+            
+            lastSize = viewportSize;
+        }
 
 
-        /* 
-        Nieco na styl:
-
-        glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-        glViewport(0, 0, (int)viewportSize.x, (int)viewportSize.y);
+        glBindFramebuffer(GL_FRAMEBUFFER, main_viewport_fbo);
+        glViewport(0, 0, (int)viewportSize.x, (int)viewportSize.y);        
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        RenderSomeObject();
+        // Render();
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        
-        Zobraz texturu do viewport:
 
-        ImGui::Image(
-        (void*)(intptr_t)textureColorBuffer,
-            viewportSize,
-            ImVec2(0, 1),  // UV0 (flip Y)
-            ImVec2(1, 0)   // UV1 (flip Y)
-        );
-        
-        */
+        ImGui::Image((void*)(intptr_t)main_viewport_tex, viewportSize, ImVec2(0, 1), ImVec2(1, 0));
+ 
 
         ImGui::End();
         ImGui::PopStyleVar();
