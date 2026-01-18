@@ -40,6 +40,14 @@ message(STATUS "Adding Dear ImGui files...")
 #     external/imgui/imgui_demo.cpp
 #     external/imgui/imgui_draw.cpp... atd
 
+file(GLOB SOURCES
+    src/*.cpp
+)
+
+file(GLOB HEADERS
+    src/*.h
+)
+
 file(GLOB IMGUI_SRC
     external/imgui/*.cpp
 )
@@ -76,26 +84,25 @@ endif()
 
 message(STATUS "OpenGL libraries: ${OPENGL_LIBRARIES}")
 
-
-set(SOURCES 
-    src/main.cpp
-)
-
 # Veggen application
 add_executable(Veggen 
     ${SOURCES}
+    ${HEADERS}
     ${IMGUI_SRC}
     ${IMGUI_SRC_GLFW_OGL}
     ${IMGUI_HEADERS}
     ${IMGUI_HEADERS_GLFW_OGL}
 )
 
+target_compile_definitions(Veggen PRIVATE _USE_MATH_DEFINES IMGUI_DEFINE_MATH_OPERATORS)
+target_precompile_headers(Veggen PRIVATE src/pch.h)
+
 # VS Filters
 source_group("Source Files" FILES ${SOURCES})
 source_group("Source Files\\ImGui" FILES ${IMGUI_SRC})
 source_group("Source Files\\ImGui\\Backends" FILES ${IMGUI_SRC_GLFW_OGL})
 
-#source_group("Header Files" FILES ${HEADERS})
+source_group("Header Files" FILES ${HEADERS})
 source_group("Header Files\\ImGui" FILES ${IMGUI_HEADERS})
 source_group("Header Files\\ImGui\\Backends" FILES ${IMGUI_HEADERS_GLFW_OGL})
 

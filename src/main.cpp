@@ -1,15 +1,8 @@
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-
-#include <iostream>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-
-#include <imgui.h>
+#include "pch.h"
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
-#define _USE_MATH_DEFINES
-#include <math.h>
+
+//#include <ShaderProgram.h>
 
 void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
@@ -28,7 +21,6 @@ const char* fragmentShaderSource = "#version 330 core\n"
 "}\n\0";
 
 int main() {
-
     // GLM Test
     glm::vec3 position(1.0f, 2.0f, 3.0f);
     std::cout << "Position: " << position.x << ", "
@@ -102,6 +94,8 @@ int main() {
     GLuint main_viewport_tex;
     GLuint main_viewport_rbo;
 
+
+    //ShaderProgram basic_shader({"vfgfg", "fdf"});
 
     glGenFramebuffers(1, &main_viewport_fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, main_viewport_fbo);
