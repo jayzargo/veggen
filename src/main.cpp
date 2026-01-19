@@ -112,50 +112,69 @@ int main() {
 
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
+    glEnable(GL_DEPTH_TEST);
+
+
     ShaderProgram basic_shader({ "DefaultShader.vert", "DefaultShader.frag" });
 
-    // set up vertex data (and buffer(s)) and configure vertex attributes
-// ------------------------------------------------------------------
+    // TESTCODE END
+
     float vertices[] = {
-         0.5f,  0.5f, 0.0f,  // top right
-         0.5f, -0.5f, 0.0f,  // bottom right
-        -0.5f, -0.5f, 0.0f,  // bottom left
-        -0.5f,  0.5f, 0.0f   // top left 
+     -0.5f, -0.5f, -0.5f,
+      0.5f, -0.5f, -0.5f,
+      0.5f,  0.5f, -0.5f,
+      0.5f,  0.5f, -0.5f,
+     -0.5f,  0.5f, -0.5f,
+     -0.5f, -0.5f, -0.5f,
+
+     -0.5f, -0.5f,  0.5f,
+      0.5f, -0.5f,  0.5f,
+      0.5f,  0.5f,  0.5f,
+      0.5f,  0.5f,  0.5f,
+     -0.5f,  0.5f,  0.5f,
+     -0.5f, -0.5f,  0.5f,
+
+     -0.5f,  0.5f,  0.5f,
+     -0.5f,  0.5f, -0.5f,
+     -0.5f, -0.5f, -0.5f,
+     -0.5f, -0.5f, -0.5f,
+     -0.5f, -0.5f,  0.5f,
+     -0.5f,  0.5f,  0.5f,
+
+      0.5f,  0.5f,  0.5f,
+      0.5f,  0.5f, -0.5f,
+      0.5f, -0.5f, -0.5f,
+      0.5f, -0.5f, -0.5f,
+      0.5f, -0.5f,  0.5f,
+      0.5f,  0.5f,  0.5f,
+
+     -0.5f, -0.5f, -0.5f,
+      0.5f, -0.5f, -0.5f,
+      0.5f, -0.5f,  0.5f,
+      0.5f, -0.5f,  0.5f,
+     -0.5f, -0.5f,  0.5f,
+     -0.5f, -0.5f, -0.5f,
+
+     -0.5f,  0.5f, -0.5f,
+      0.5f,  0.5f, -0.5f,
+      0.5f,  0.5f,  0.5f,
+      0.5f,  0.5f,  0.5f,
+     -0.5f,  0.5f,  0.5f,
+     -0.5f,  0.5f, -0.5f
     };
-    unsigned int indices[] = {  // note that we start from 0!
-        0, 1, 3,  // first Triangle
-        1, 2, 3   // second Triangle
-    };
-    unsigned int VBO, VAO, EBO;
+    unsigned int VBO, VAO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
-    // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
+
     glBindVertexArray(VAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
+    // position attribute
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-    // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    // remember: do NOT unbind the EBO while a VAO is active as the bound element buffer object IS stored in the VAO; keep the EBO bound.
-    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-    // You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
-    // VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
-    glBindVertexArray(0);
-
-
-    // TESTCODE END
-
-    CubeGeometry cube_mesh = CubeGeometry::GetCubeGeometry();
 
     // Render loop
     while (!glfwWindowShouldClose(window))
@@ -271,29 +290,25 @@ int main() {
 
         float aspect = viewportSize.x / viewportSize.y;
 
-        glm::mat4 P = glm::ortho(-aspect, aspect, -1.0f, 1.0f);
-        glm::mat4 model = glm::mat4(1.0f);
-        glm::mat4 view = glm::mat4(1.0f);
-        glm::mat4 projection = glm::mat4(1.0f);
-
-        model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5f, 1.0f, 0.0f));
-        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-        projection = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 100.0f);
-        
-        glm::mat4 mvp = projection * view * model;
 
         // Render();
         basic_shader.use();
+
+        // create transformations
+        glm::mat4 model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
+        glm::mat4 view = glm::mat4(1.0f);
+        glm::mat4 projection = glm::mat4(1.0f);
+        //model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5f, 1.0f, 0.0f));
+        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+        //projection = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 100.0f);
+
         basic_shader.UniformSetMatrix4x4(&model[0][0], "model");
         basic_shader.UniformSetMatrix4x4(&view[0][0], "view");
         basic_shader.UniformSetMatrix4x4(&projection[0][0], "projection");
 
-        //basic_shader.UniformSetMatrix4x4(&P[0][0], "P");
-
-        //glBindVertexArray(VAO);
-        //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
-        cube_mesh.Draw();
+        glBindVertexArray(VAO);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+        glBindVertexArray(0);
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -323,10 +338,6 @@ int main() {
         glfwSwapBuffers(window);
     }
 
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &EBO);
-    
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
