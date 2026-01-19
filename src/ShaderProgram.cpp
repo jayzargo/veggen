@@ -208,7 +208,8 @@ void ShaderProgram::UniformSetMatrix4x4(const GLfloat* data, const char* matrix_
 	}
 	else
 	{
-		glUniformMatrix4fv(location, 1, GL_TRUE, data);
+		// Pri column/row order! pri glm nastavit GL_FALSE!
+		glUniformMatrix4fv(location, 1, GL_FALSE, data);
 	}
 }
 

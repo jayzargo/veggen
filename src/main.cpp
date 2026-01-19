@@ -111,70 +111,10 @@ int main() {
 // vertex shader
 
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
     glEnable(GL_DEPTH_TEST);
 
-
     ShaderProgram basic_shader({ "DefaultShader.vert", "DefaultShader.frag" });
-
-    // TESTCODE END
-
-    float vertices[] = {
-     -0.5f, -0.5f, -0.5f,
-      0.5f, -0.5f, -0.5f,
-      0.5f,  0.5f, -0.5f,
-      0.5f,  0.5f, -0.5f,
-     -0.5f,  0.5f, -0.5f,
-     -0.5f, -0.5f, -0.5f,
-
-     -0.5f, -0.5f,  0.5f,
-      0.5f, -0.5f,  0.5f,
-      0.5f,  0.5f,  0.5f,
-      0.5f,  0.5f,  0.5f,
-     -0.5f,  0.5f,  0.5f,
-     -0.5f, -0.5f,  0.5f,
-
-     -0.5f,  0.5f,  0.5f,
-     -0.5f,  0.5f, -0.5f,
-     -0.5f, -0.5f, -0.5f,
-     -0.5f, -0.5f, -0.5f,
-     -0.5f, -0.5f,  0.5f,
-     -0.5f,  0.5f,  0.5f,
-
-      0.5f,  0.5f,  0.5f,
-      0.5f,  0.5f, -0.5f,
-      0.5f, -0.5f, -0.5f,
-      0.5f, -0.5f, -0.5f,
-      0.5f, -0.5f,  0.5f,
-      0.5f,  0.5f,  0.5f,
-
-     -0.5f, -0.5f, -0.5f,
-      0.5f, -0.5f, -0.5f,
-      0.5f, -0.5f,  0.5f,
-      0.5f, -0.5f,  0.5f,
-     -0.5f, -0.5f,  0.5f,
-     -0.5f, -0.5f, -0.5f,
-
-     -0.5f,  0.5f, -0.5f,
-      0.5f,  0.5f, -0.5f,
-      0.5f,  0.5f,  0.5f,
-      0.5f,  0.5f,  0.5f,
-     -0.5f,  0.5f,  0.5f,
-     -0.5f,  0.5f, -0.5f
-    };
-    unsigned int VBO, VAO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-
-    glBindVertexArray(VAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    // position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
+    CubeGeometry cube_mesh = CubeGeometry::GetCubeGeometry();
 
     // Render loop
     while (!glfwWindowShouldClose(window))
@@ -290,25 +230,23 @@ int main() {
 
         float aspect = viewportSize.x / viewportSize.y;
 
-
         // Render();
         basic_shader.use();
 
-        // create transformations
-        glm::mat4 model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
+        glm::mat4 model = glm::mat4(1.0f);
         glm::mat4 view = glm::mat4(1.0f);
         glm::mat4 projection = glm::mat4(1.0f);
-        //model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5f, 1.0f, 0.0f));
+        
+        model = glm::scale(model, glm::vec3(0.5f));
+        model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5f, 1.0f, 0.0f));
         view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-        //projection = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 100.0f);
+        projection = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 100.0f);
 
-        basic_shader.UniformSetMatrix4x4(&model[0][0], "model");
-        basic_shader.UniformSetMatrix4x4(&view[0][0], "view");
-        basic_shader.UniformSetMatrix4x4(&projection[0][0], "projection");
+        glm::mat4 mvp = projection * view * model;
 
-        glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-        glBindVertexArray(0);
+        basic_shader.UniformSetMatrix4x4(&mvp[0][0], "mvp");
+        
+        cube_mesh.Draw();
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
