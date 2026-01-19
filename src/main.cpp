@@ -3,7 +3,7 @@
 #include <imgui_impl_opengl3.h>
 
 #include <ShaderProgram.h>
-#include <filesystem>
+#include <CubeGeometry.h>
 
 void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
@@ -49,8 +49,6 @@ int main() {
     glfwSwapInterval(1); // Enable vsync
     glfwSetFramebufferSizeCallback(window, FramebufferSizeCallback);
 
-
-    std::cout << std::filesystem::current_path() << std::endl;
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
@@ -111,6 +109,7 @@ int main() {
     // build and compile our shader program
 // ------------------------------------
 // vertex shader
+
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     ShaderProgram basic_shader({ "DefaultShader.vert", "DefaultShader.frag" });
@@ -155,6 +154,8 @@ int main() {
 
 
     // TESTCODE END
+
+    CubeGeometry cube_mesh = CubeGeometry::GetCubeGeometry();
 
     // Render loop
     while (!glfwWindowShouldClose(window))
@@ -269,15 +270,30 @@ int main() {
         //glGetIntegerv(GL_VIEWPORT, viewport);
 
         float aspect = viewportSize.x / viewportSize.y;
-        glm::mat4 P = glm::ortho(-aspect, aspect, -1.0f, 1.0f);
-        basic_shader.UniformSetMatrix4x4(&P[0][0], "P");
 
+        glm::mat4 P = glm::ortho(-aspect, aspect, -1.0f, 1.0f);
+        glm::mat4 model = glm::mat4(1.0f);
+        glm::mat4 view = glm::mat4(1.0f);
+        glm::mat4 projection = glm::mat4(1.0f);
+
+        model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5f, 1.0f, 0.0f));
+        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+        projection = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 100.0f);
+        
+        glm::mat4 mvp = projection * view * model;
 
         // Render();
         basic_shader.use();
-        glBindVertexArray(VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
-        //glDrawArrays(GL_TRIANGLES, 0, 6);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        basic_shader.UniformSetMatrix4x4(&model[0][0], "model");
+        basic_shader.UniformSetMatrix4x4(&view[0][0], "view");
+        basic_shader.UniformSetMatrix4x4(&projection[0][0], "projection");
+
+        //basic_shader.UniformSetMatrix4x4(&P[0][0], "P");
+
+        //glBindVertexArray(VAO);
+        //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+        cube_mesh.Draw();
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
