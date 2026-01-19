@@ -94,10 +94,26 @@ add_executable(Veggen
     ${IMGUI_HEADERS_GLFW_OGL}
 )
 
+file(GLOB CONFIGURE_DEPENDS FRAG_SHADERS
+    src/shaders/*.frag
+)
+
+file(GLOB CONFIGURE_DEPENDS VERT_SHADERS
+    src/shaders/*.vert
+)
+
+target_sources(Veggen PRIVATE
+    ${FRAG_SHADERS}
+    ${VERT_SHADERS}
+)
+
 target_compile_definitions(Veggen PRIVATE _USE_MATH_DEFINES IMGUI_DEFINE_MATH_OPERATORS)
 target_precompile_headers(Veggen PRIVATE src/pch.h)
 
 # VS Filters
+source_group("Source Files\\Shaders\\Frag" FILES ${FRAG_SHADERS})
+source_group("Source Files\\Shaders\\Vert" FILES ${VERT_SHADERS})
+
 source_group("Source Files" FILES ${SOURCES})
 source_group("Source Files\\ImGui" FILES ${IMGUI_SRC})
 source_group("Source Files\\ImGui\\Backends" FILES ${IMGUI_SRC_GLFW_OGL})
@@ -135,6 +151,12 @@ add_custom_target(run
     DEPENDS Veggen
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     COMMENT "Running MyApp..."
+)
+
+add_custom_command(TARGET Veggen POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            ${CMAKE_SOURCE_DIR}/src/shaders
+            $<TARGET_FILE_DIR:Veggen>/
 )
 
 # Project generation info

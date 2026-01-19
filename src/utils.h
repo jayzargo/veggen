@@ -3,8 +3,8 @@
 // This file is inspired from PGII 
 
 /*! \fn long long GetFileSize64( const char * file_name )
-\brief Vrátí velikost souboru v bytech.
-\param file_name Úplná cesta k souboru
+\brief Returns the file size in bytes.
+\param file_name Full path to the file
 */
 long long GetFileSize64(const char* file_name);
 

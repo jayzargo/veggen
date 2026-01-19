@@ -2,7 +2,7 @@
 #include <utils.h>
 #include <ShaderProgram.h>
 
-ShaderProgram::ShaderProgram(const std::vector<std::string> shader_path_list)
+ShaderProgram::ShaderProgram(const std::vector<std::string> &shader_path_list)
 {
 	m_program_id = glCreateProgram();
 
@@ -238,4 +238,9 @@ void ShaderProgram::UniformSetVector2(const GLfloat* data, const char* vector_na
 	{
 		glUniform2fv(location, 1, data);
 	}
+}
+
+ShaderProgram::~ShaderProgram()
+{
+	glDeleteProgram(m_program_id);
 }

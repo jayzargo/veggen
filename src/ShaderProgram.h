@@ -4,7 +4,7 @@
 class ShaderProgram
 {
 public:
-	ShaderProgram(const std::vector<std::string> shader_path_list);
+	ShaderProgram(const std::vector<std::string> &shader_path_list);
 	~ShaderProgram();
 
 	void use();
