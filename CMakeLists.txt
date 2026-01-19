@@ -35,7 +35,7 @@ target_include_directories(glad PUBLIC
 # Add ImGui
 message(STATUS "Adding Dear ImGui files...")
 
-# Aby sme nemuseli
+# GLOB - Aby sme nemuseli
 #     external/imgui/imgui.cpp
 #     external/imgui/imgui_demo.cpp
 #     external/imgui/imgui_draw.cpp... atd
@@ -84,10 +84,29 @@ endif()
 
 message(STATUS "OpenGL libraries: ${OPENGL_LIBRARIES}")
 
+file(GLOB FRAG_SHADERS src/shaders/*.frag)
+file(GLOB VERT_SHADERS src/shaders/*.vert)
+
+# VS Filters
+# 1. najprv definujeme filters - source_group() nastavuje metadata pre subory
+# 2. potom projekt/executable - add_executable()
+source_group("Source Files\\Shaders\\Frag" FILES ${FRAG_SHADERS})
+source_group("Source Files\\Shaders\\Vert" FILES ${VERT_SHADERS})
+
+source_group("Source Files" FILES ${SOURCES})
+source_group("Source Files\\ImGui" FILES ${IMGUI_SRC})
+source_group("Source Files\\ImGui\\Backends" FILES ${IMGUI_SRC_GLFW_OGL})
+
+source_group("Header Files" FILES ${HEADERS})
+source_group("Header Files\\ImGui" FILES ${IMGUI_HEADERS})
+source_group("Header Files\\ImGui\\Backends" FILES ${IMGUI_HEADERS_GLFW_OGL})
+
 # Veggen application
 add_executable(Veggen 
     ${SOURCES}
     ${HEADERS}
+    ${FRAG_SHADERS}
+    ${VERT_SHADERS}
     ${IMGUI_SRC}
     ${IMGUI_SRC_GLFW_OGL}
     ${IMGUI_HEADERS}
@@ -109,18 +128,6 @@ target_sources(Veggen PRIVATE
 
 target_compile_definitions(Veggen PRIVATE _USE_MATH_DEFINES IMGUI_DEFINE_MATH_OPERATORS)
 target_precompile_headers(Veggen PRIVATE src/pch.h)
-
-# VS Filters
-source_group("Source Files\\Shaders\\Frag" FILES ${FRAG_SHADERS})
-source_group("Source Files\\Shaders\\Vert" FILES ${VERT_SHADERS})
-
-source_group("Source Files" FILES ${SOURCES})
-source_group("Source Files\\ImGui" FILES ${IMGUI_SRC})
-source_group("Source Files\\ImGui\\Backends" FILES ${IMGUI_SRC_GLFW_OGL})
-
-source_group("Header Files" FILES ${HEADERS})
-source_group("Header Files\\ImGui" FILES ${IMGUI_HEADERS})
-source_group("Header Files\\ImGui\\Backends" FILES ${IMGUI_HEADERS_GLFW_OGL})
 
 # Include directories for compiler
 target_include_directories(Veggen PRIVATE
@@ -156,7 +163,7 @@ add_custom_target(run
 add_custom_command(TARGET Veggen POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
             ${CMAKE_SOURCE_DIR}/src/shaders
-            $<TARGET_FILE_DIR:Veggen>/
+            ${CMAKE_BINARY_DIR}/
 )
 
 # Project generation info
