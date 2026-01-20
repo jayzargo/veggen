@@ -201,6 +201,9 @@ int main() {
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
         ImGui::Begin("Viewport");
 
+        ImVec2 viewport_size = ImGui::GetContentRegionAvail();
+        ImVec2 viewport_pos = ImGui::GetCursorScreenPos();
+
         static ImVec2 lastSize = ImVec2(0, 0);
         ImVec2 viewportSize = ImGui::GetContentRegionAvail();
         //printf("ImGui viewport x:%d y:%d\n", (int) viewportSize.x,(int) viewportSize.y);
@@ -251,7 +254,60 @@ int main() {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         ImGui::Image((void*)(intptr_t)main_viewport_tex, viewportSize, ImVec2(0, 1), ImVec2(1, 0));
- 
+        
+        // Check IO on viewport
+        bool is_hovered = ImGui::IsWindowHovered();
+        bool is_focused = ImGui::IsWindowFocused();
+
+        // Mouse events
+        if (is_hovered) {
+            ImGuiIO& io = ImGui::GetIO();
+
+            // Need to compute relative mouse pos + normalize to [0,1]
+            ImVec2 mouse_pos = io.MousePos;
+            ImVec2 relative_pos = ImVec2(
+                mouse_pos.x - viewport_pos.x,
+                mouse_pos.y - viewport_pos.y
+            );
+            
+            ImVec2 normalized_pos = ImVec2(
+                relative_pos.x / viewport_size.x,
+                relative_pos.y / viewport_size.y
+            );
+
+            if (io.MouseClicked[0]) {
+                printf("Click at viewport pos: %.0f, %.0f\n", relative_pos.x, relative_pos.y);
+            }
+
+            // Right drag
+            if (io.MouseDown[1]) {
+                printf("Right drag at viewport\n");
+            }
+
+            // SCROLL (zoom):
+            if (io.MouseWheel != 0.0f) {
+                printf("Scroll at viewport\n");
+            }
+            
+        }
+
+        // Keyboard input
+        if (is_focused) {
+            ImGuiIO& io = ImGui::GetIO();
+
+            // WASD movement:
+            float speed = 0.1f;
+            if (ImGui::IsKeyDown(ImGuiKey_W)) printf("W key pressed\n");
+            if (ImGui::IsKeyDown(ImGuiKey_S)) printf("S key pressed\n");
+            if (ImGui::IsKeyDown(ImGuiKey_A)) printf("A key pressed\n");
+            
+            // Repeating until key is not up
+            if (ImGui::IsKeyDown(ImGuiKey_D)) printf("D key pressed\n");
+            // Only pressed = key down, key up
+            if (ImGui::IsKeyPressed(ImGuiKey_P, false)) printf("P key pressed\n");;
+
+        }
+
 
         ImGui::End();
         ImGui::PopStyleVar();
