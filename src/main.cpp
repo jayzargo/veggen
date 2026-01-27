@@ -205,6 +205,8 @@ int main() {
         ImVec2 viewport_pos = ImGui::GetCursorScreenPos();
 
         static ImVec2 lastSize = ImVec2(0, 0);
+        static float rot = 0.0f;
+
         ImVec2 viewportSize = ImGui::GetContentRegionAvail();
         //printf("ImGui viewport x:%d y:%d\n", (int) viewportSize.x,(int) viewportSize.y);
 
@@ -246,10 +248,11 @@ int main() {
         float camX = sin(glfwGetTime()) * radius;
         float camZ = cos(glfwGetTime()) * radius;
 
-        view = glm::lookAt(glm::vec3(camX, 0.0, camZ), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
-
+        //view = glm::lookAt(glm::vec3(camX, 0.0, camZ), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
         //model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5f, 1.0f, 0.0f));
-        //view = glm::translate(view, glm::vec3(0.0f, 0.0f, -7.0f));
+
+        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -6.0f));
+        view = glm::rotate(view, (float)glm::radians(rot), glm::vec3(1.0f, 0.0f, 0.0f));
         
         projection = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 100.0f);
 
@@ -296,7 +299,6 @@ int main() {
             if (io.MouseWheel != 0.0f) {
                 printf("Scroll at viewport\n");
             }
-            
         }
 
         // Keyboard input
@@ -305,8 +307,18 @@ int main() {
 
             // WASD movement:
             float speed = 0.1f;
-            if (ImGui::IsKeyDown(ImGuiKey_W)) printf("W key pressed\n");
-            if (ImGui::IsKeyDown(ImGuiKey_S)) printf("S key pressed\n");
+            if (ImGui::IsKeyDown(ImGuiKey_W)) {
+                rot += 1.0f;
+                printf("%f\n", glm::radians(rot) );
+                printf("W key pressed\n");
+            }
+
+            if (ImGui::IsKeyDown(ImGuiKey_S)) {
+                rot -= 1.0f;
+                printf("%f\n", glm::radians(rot));
+                printf("S key pressed\n");
+            }
+
             if (ImGui::IsKeyDown(ImGuiKey_A)) printf("A key pressed\n");
             
             // Repeating until key is not up
