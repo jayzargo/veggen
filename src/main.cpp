@@ -8,6 +8,14 @@
 void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 
+float last_mouse_x = 10.0f;
+float last_mouse_y = 10.0f;
+bool first_mouse = true;
+bool orbiting_end = false;
+float yaw = 0.0f;
+float pitch = 0.0f;
+glm::vec3 camera_eye;
+
 int main() {
     // GLM Test
     glm::vec3 position(1.0f, 2.0f, 3.0f);
@@ -248,11 +256,11 @@ int main() {
         float camX = sin(glfwGetTime()) * radius;
         float camZ = cos(glfwGetTime()) * radius;
 
-        //view = glm::lookAt(glm::vec3(camX, 0.0, camZ), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
+        view = glm::lookAt(camera_eye, glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
+        
         //model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5f, 1.0f, 0.0f));
-
-        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -6.0f));
-        view = glm::rotate(view, (float)glm::radians(rot), glm::vec3(1.0f, 0.0f, 0.0f));
+        //view = glm::translate(view, glm::vec3(0.0f, 0.0f, -6.0f));
+        //view = glm::rotate(view, (float)glm::radians(rot), glm::vec3(1.0f, 0.0f, 0.0f));
         
         projection = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 100.0f);
 
@@ -293,7 +301,49 @@ int main() {
             // Right drag
             if (io.MouseDown[1]) {
                 printf("Right drag at viewport\n");
+
+                if (first_mouse) {
+                    last_mouse_x = relative_pos.x;
+                    last_mouse_y = relative_pos.y;
+                    first_mouse = false;
+                }
+
+                float xoffset = relative_pos.x - last_mouse_x;
+                float yoffset = relative_pos.y - last_mouse_y;
+                last_mouse_x = relative_pos.x;
+                last_mouse_y = relative_pos.y;
+
+                printf("offset x: %f\n", xoffset);
+                printf("yaw x: %f\n", yaw);
+
+
+                float sens = 0.1f;
+                xoffset *= sens;
+                yoffset *= sens;
+
+                yaw += xoffset;
+                pitch += yoffset;
+
+                if (pitch > 89.0f) {
+                    pitch = 89.0f;
+                }
+                if (pitch < -89.0f) {
+                    pitch = -89.0f;
+                }
+
+                glm::vec3 eye;
+                float radius = 3.0f;
+                eye.x = radius * cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+                eye.y = radius * sin(glm::radians(pitch));
+                eye.z = radius * sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+                camera_eye = eye;
             }
+
+            if (io.MouseReleased[1]) {
+                first_mouse = true;
+                printf("released right\n");
+            }
+
 
             // SCROLL (zoom):
             if (io.MouseWheel != 0.0f) {
