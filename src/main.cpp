@@ -333,6 +333,7 @@ int main() {
 
                 glm::vec3 eye;
                 float radius = 3.0f;
+                // Add center or move object to 0,0,0  center.x + radius * cos...
                 eye.x = radius * cos(glm::radians(yaw)) * cos(glm::radians(pitch));
                 eye.y = radius * sin(glm::radians(pitch));
                 eye.z = radius * sin(glm::radians(yaw)) * cos(glm::radians(pitch));
