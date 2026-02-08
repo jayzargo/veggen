@@ -12,9 +12,23 @@ float last_mouse_x = 10.0f;
 float last_mouse_y = 10.0f;
 bool first_mouse = true;
 bool orbiting_end = false;
-float yaw = 0.0f;
+float yaw = -90.0f;
 float pitch = 0.0f;
 glm::vec3 camera_eye;
+
+glm::vec3 inverse(glm::vec3& pos, glm::vec3& center) {
+    glm::vec3 offset = pos - center;
+    float radius = glm::length(offset);
+
+    if (radius < 0.0001f) {
+        return { 0.0f, 0.0f, 0.0f };
+    }
+
+    float pitch = asin(glm::clamp(offset.y / radius, -1.0f, 1.0f));
+    float yaw = atan2(offset.x, offset.z);
+
+    return glm::vec3(yaw, pitch, radius);
+}
 
 int main() {
     // GLM Test
@@ -113,16 +127,26 @@ int main() {
     }
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-// TESTCODE BEGIN
-    // build and compile our shader program
-// ------------------------------------
-// vertex shader
-
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     glEnable(GL_DEPTH_TEST);
 
     ShaderProgram basic_shader({ "DefaultShader.vert", "DefaultShader.frag" });
     CubeGeometry cube_mesh = CubeGeometry::GetCubeGeometry();
+
+    glm::vec3 ypr = inverse(glm::vec3(0, 0, 3), glm::vec3(0, 0, 0));
+
+    std::cout << "yaw " << glm::degrees(ypr.x) << std::endl;
+    std::cout << "pitch " << glm::degrees(ypr.y) << std::endl;
+    std::cout << "radius " << ypr.z << std::endl;
+
+    yaw = 45;
+    pitch = 45;
+
+
+    camera_eye.x = ypr.z * cos(glm::radians(pitch)) * sin(glm::radians(yaw));
+    camera_eye.y = ypr.z * sin(glm::radians(pitch));
+    camera_eye.z = ypr.z * cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+
 
     // Render loop
     while (!glfwWindowShouldClose(window))
@@ -232,7 +256,6 @@ int main() {
             lastSize = viewportSize;
         }
 
-
         glBindFramebuffer(GL_FRAMEBUFFER, main_viewport_fbo);
         glViewport(0, 0, (int)viewportSize.x, (int)viewportSize.y);        
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -258,6 +281,8 @@ int main() {
 
         view = glm::lookAt(camera_eye, glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
         
+        std::cout << "v: (" << camera_eye.x << ", " << camera_eye.y << ", " << camera_eye.z << ")" << std::endl;
+
         //model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5f, 1.0f, 0.0f));
         //view = glm::translate(view, glm::vec3(0.0f, 0.0f, -6.0f));
         //view = glm::rotate(view, (float)glm::radians(rot), glm::vec3(1.0f, 0.0f, 0.0f));
@@ -334,10 +359,15 @@ int main() {
                 glm::vec3 eye;
                 float radius = 3.0f;
                 // Add center or move object to 0,0,0  center.x + radius * cos...
-                eye.x = radius * cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+                // 0deg = +Z, 180deg = -Z
+                eye.x = radius * cos(glm::radians(pitch)) * sin(glm::radians(yaw));
                 eye.y = radius * sin(glm::radians(pitch));
-                eye.z = radius * sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+                eye.z = radius * cos(glm::radians(yaw)) * cos(glm::radians(pitch));
                 camera_eye = eye;
+
+                // Inverse yaw, pitch
+                
+                //(eye, center, up,radius, );
             }
 
             if (io.MouseReleased[1]) {
