@@ -15,6 +15,7 @@ public:
 
 	OrbitalCamera(const float yaw, const float pitch, const float radius, const glm::vec3 &center,const glm::vec3 &up);
 	glm::mat4 GetViewMatrix();
+	void ProcessMouseMovement(const float xoffset, const float yoffset);
 
 private:
 	void UpdateVectors();

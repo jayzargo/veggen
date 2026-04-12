@@ -4,6 +4,7 @@
 
 #include <ShaderProgram.h>
 #include <CubeGeometry.h>
+#include <OrbitalCamera.h>
 
 void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
@@ -12,23 +13,6 @@ float last_mouse_x = 10.0f;
 float last_mouse_y = 10.0f;
 bool first_mouse = true;
 bool orbiting_end = false;
-float yaw = -90.0f;
-float pitch = 0.0f;
-glm::vec3 camera_eye;
-
-glm::vec3 inverse(glm::vec3& pos, glm::vec3& center) {
-    glm::vec3 offset = pos - center;
-    float radius = glm::length(offset);
-
-    if (radius < 0.0001f) {
-        return { 0.0f, 0.0f, 0.0f };
-    }
-
-    float pitch = asin(glm::clamp(offset.y / radius, -1.0f, 1.0f));
-    float yaw = atan2(offset.x, offset.z);
-
-    return glm::vec3(yaw, pitch, radius);
-}
 
 int main() {
     // GLM Test
@@ -133,20 +117,7 @@ int main() {
     ShaderProgram basic_shader({ "DefaultShader.vert", "DefaultShader.frag" });
     CubeGeometry cube_mesh = CubeGeometry::GetCubeGeometry();
 
-    glm::vec3 ypr = inverse(glm::vec3(0, 0, 3), glm::vec3(0, 0, 0));
-
-    std::cout << "yaw " << glm::degrees(ypr.x) << std::endl;
-    std::cout << "pitch " << glm::degrees(ypr.y) << std::endl;
-    std::cout << "radius " << ypr.z << std::endl;
-
-    yaw = 45;
-    pitch = 45;
-
-
-    camera_eye.x = ypr.z * cos(glm::radians(pitch)) * sin(glm::radians(yaw));
-    camera_eye.y = ypr.z * sin(glm::radians(pitch));
-    camera_eye.z = ypr.z * cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-
+    OrbitalCamera o_camera = OrbitalCamera(0.0, 0.0, 4.0, glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
 
     // Render loop
     while (!glfwWindowShouldClose(window))
@@ -239,32 +210,29 @@ int main() {
         static ImVec2 lastSize = ImVec2(0, 0);
         static float rot = 0.0f;
 
-        ImVec2 viewportSize = ImGui::GetContentRegionAvail();
-        //printf("ImGui viewport x:%d y:%d\n", (int) viewportSize.x,(int) viewportSize.y);
-
-        if ((int)viewportSize.x != (int)lastSize.x || (int)viewportSize.y != (int)lastSize.y) {
-            printf("resized x %d y %d\n", (int)viewportSize.x, (int)viewportSize.y);
+        if ((int)viewport_size.x != (int)lastSize.x || (int)viewport_size.y != (int)lastSize.y) {
+            printf("resized x %d y %d\n", (int)viewport_size.x, (int)viewport_size.y);
 
             glBindTexture(GL_TEXTURE_2D, main_viewport_tex);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, (int)viewportSize.x, (int)viewportSize.y, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, (int)viewport_size.x, (int)viewport_size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
             glBindTexture(GL_TEXTURE_2D, 0);
 
             glBindRenderbuffer(GL_RENDERBUFFER, main_viewport_rbo);
-            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, (int)viewportSize.x, (int)viewportSize.y);
+            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, (int)viewport_size.x, (int)viewport_size.y);
             glBindRenderbuffer(GL_RENDERBUFFER, 0);
             
-            lastSize = viewportSize;
+            lastSize = viewport_size;
         }
 
         glBindFramebuffer(GL_FRAMEBUFFER, main_viewport_fbo);
-        glViewport(0, 0, (int)viewportSize.x, (int)viewportSize.y);        
+        glViewport(0, 0, (int)viewport_size.x, (int)viewport_size.y);
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         //GLint viewpor[4];
         //glGetIntegerv(GL_VIEWPORT, viewport);
 
-        float aspect = viewportSize.x / viewportSize.y;
+        float aspect = viewport_size.x / viewport_size.y;
 
         // Render();
         basic_shader.use();
@@ -273,31 +241,18 @@ int main() {
         glm::mat4 view = glm::mat4(1.0f);
         glm::mat4 projection = glm::mat4(1.0f);
         
+        view = o_camera.GetViewMatrix();
         model = glm::scale(model, glm::vec3(0.5f));
-        
-        const float radius = 3.0f;
-        float camX = sin(glfwGetTime()) * radius;
-        float camZ = cos(glfwGetTime()) * radius;
-
-        view = glm::lookAt(camera_eye, glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
-        
-        std::cout << "v: (" << camera_eye.x << ", " << camera_eye.y << ", " << camera_eye.z << ")" << std::endl;
-
-        //model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5f, 1.0f, 0.0f));
-        //view = glm::translate(view, glm::vec3(0.0f, 0.0f, -6.0f));
-        //view = glm::rotate(view, (float)glm::radians(rot), glm::vec3(1.0f, 0.0f, 0.0f));
-        
         projection = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 100.0f);
 
         glm::mat4 mvp = projection * view * model;
 
+        basic_shader.use();
         basic_shader.UniformSetMatrix4x4(&mvp[0][0], "mvp");
-        
         cube_mesh.Draw();
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-        ImGui::Image((void*)(intptr_t)main_viewport_tex, viewportSize, ImVec2(0, 1), ImVec2(1, 0));
+        ImGui::Image((void*)(intptr_t)main_viewport_tex, viewport_size, ImVec2(0, 1), ImVec2(1, 0));
         
         // Check IO on viewport
         bool is_hovered = ImGui::IsWindowHovered();
@@ -305,6 +260,7 @@ int main() {
 
         // Mouse events
         if (is_hovered) {
+
             ImGuiIO& io = ImGui::GetIO();
 
             // Need to compute relative mouse pos + normalize to [0,1]
@@ -337,35 +293,8 @@ int main() {
                 float yoffset = relative_pos.y - last_mouse_y;
                 last_mouse_x = relative_pos.x;
                 last_mouse_y = relative_pos.y;
-
-                printf("offset x: %f\n", xoffset);
-                printf("yaw x: %f\n", yaw);
-
-
-                float sens = 0.1f;
-                xoffset *= sens;
-                yoffset *= sens;
-
-                yaw += xoffset;
-                pitch += yoffset;
-
-                if (pitch > 89.0f) {
-                    pitch = 89.0f;
-                }
-                if (pitch < -89.0f) {
-                    pitch = -89.0f;
-                }
-
-                glm::vec3 eye;
-                float radius = 3.0f;
-                // Add center or move object to 0,0,0  center.x + radius * cos...
-                // 0deg = +Z, 180deg = -Z
-                eye.x = radius * cos(glm::radians(pitch)) * sin(glm::radians(yaw));
-                eye.y = radius * sin(glm::radians(pitch));
-                eye.z = radius * cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-                camera_eye = eye;
-
-                // Inverse yaw, pitch
+                
+                o_camera.ProcessMouseMovement(xoffset, yoffset);
                 
                 //(eye, center, up,radius, );
             }
