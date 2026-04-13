@@ -40,12 +40,22 @@ message(STATUS "Adding Dear ImGui files...")
 #     external/imgui/imgui_demo.cpp
 #     external/imgui/imgui_draw.cpp... atd
 
-file(GLOB SOURCES
-    src/*.cpp
+set(SOURCES 
+    src/main.cpp
+    src/CommonGeometry.cpp
+    src/CubeGeometry.cpp
+    src/OrbitalCamera.cpp
+    src/ShaderProgram.cpp
+    src/utils.cpp
 )
 
-file(GLOB HEADERS
-    src/*.h
+set(HEADERS
+    src/CommonGeometry.h
+    src/CubeGeometry.h
+    src/OrbitalCamera.h
+    src/ShaderProgram.h
+    src/utils.h
+    src/pch.h
 )
 
 file(GLOB IMGUI_SRC
@@ -84,8 +94,8 @@ endif()
 
 message(STATUS "OpenGL libraries: ${OPENGL_LIBRARIES}")
 
-file(GLOB FRAG_SHADERS src/shaders/*.frag)
-file(GLOB VERT_SHADERS src/shaders/*.vert)
+file(GLOB FRAG_SHADERS CONFIGURE_DEPENDS src/shaders/*.frag)
+file(GLOB VERT_SHADERS CONFIGURE_DEPENDS src/shaders/*.vert)
 
 # VS Filters
 # 1. najprv definujeme filters - source_group() nastavuje metadata pre subory
@@ -113,19 +123,6 @@ add_executable(Veggen
     ${IMGUI_HEADERS_GLFW_OGL}
 )
 
-file(GLOB CONFIGURE_DEPENDS FRAG_SHADERS
-    src/shaders/*.frag
-)
-
-file(GLOB CONFIGURE_DEPENDS VERT_SHADERS
-    src/shaders/*.vert
-)
-
-target_sources(Veggen PRIVATE
-    ${FRAG_SHADERS}
-    ${VERT_SHADERS}
-)
-
 target_compile_definitions(Veggen PRIVATE _USE_MATH_DEFINES IMGUI_DEFINE_MATH_OPERATORS)
 target_precompile_headers(Veggen PRIVATE src/pch.h)
 
@@ -141,7 +138,7 @@ target_link_libraries(Veggen PRIVATE
     glad
     glfw
     glm::glm
-    ${OPENGL_LIBRARIES}
+    OpenGL::GL
 )
 
 if(MSVC)
@@ -156,14 +153,14 @@ endif()
 add_custom_target(run
     COMMAND $<TARGET_FILE:Veggen>
     DEPENDS Veggen
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    WORKING_DIRECTORY $<TARGET_FILE_DIR:Veggen>
     COMMENT "Running MyApp..."
 )
 
 add_custom_command(TARGET Veggen POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
             ${CMAKE_SOURCE_DIR}/src/shaders
-            ${CMAKE_BINARY_DIR}/
+            $<TARGET_FILE_DIR:Veggen>
 )
 
 # Project generation info
