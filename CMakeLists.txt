@@ -123,6 +123,10 @@ add_executable(Veggen
     ${IMGUI_HEADERS_GLFW_OGL}
 )
 
+set_target_properties(Veggen PROPERTIES
+    VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:Veggen>"
+)
+
 target_compile_definitions(Veggen PRIVATE _USE_MATH_DEFINES IMGUI_DEFINE_MATH_OPERATORS)
 target_precompile_headers(Veggen PRIVATE src/pch.h)
 
@@ -159,8 +163,11 @@ add_custom_target(run
 
 add_custom_command(TARGET Veggen POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-            ${CMAKE_SOURCE_DIR}/src/shaders
-            $<TARGET_FILE_DIR:Veggen>
+        ${CMAKE_SOURCE_DIR}/src/shaders
+        $<TARGET_FILE_DIR:Veggen>
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_SOURCE_DIR}/src/imgui.ini
+        $<TARGET_FILE_DIR:Veggen>/imgui.ini
 )
 
 # Project generation info
