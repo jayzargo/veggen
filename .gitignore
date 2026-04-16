@@ -42,3 +42,7 @@
 
 # ignore build dir
 build/
+build-*/
+
+# ignore vs code
+.vs/

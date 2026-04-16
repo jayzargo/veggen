@@ -1,0 +1,47 @@
+{
+    "version": 3,
+    "cmakeMinimumRequired": { "major": 3, "minor": 21 },
+    "configurePresets": [
+        {
+            "name": "vs-base",
+            "hidden": true,
+            "architecture": "x64"
+        },
+        {
+            "name": "vs2022",
+            "displayName": "Visual Studio 2022 (x64)",
+            "generator": "Visual Studio 17 2022",
+            "inherits": "vs-base",
+            "binaryDir": "${sourceDir}/build-vs2022"
+        },
+        {
+            "name": "vs2019",
+            "displayName": "Visual Studio 2019 (x64)",
+            "generator": "Visual Studio 16 2019",
+            "inherits": "vs-base",
+            "binaryDir": "${sourceDir}/build-vs2019"
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "vs2022-debug",
+            "configurePreset": "vs2022",
+            "configuration": "Debug"
+        },
+        {
+            "name": "vs2022-release",
+            "configurePreset": "vs2022",
+            "configuration": "Release"
+        },
+        {
+            "name": "vs2019-debug",
+            "configurePreset": "vs2019",
+            "configuration": "Debug"
+        },
+        {
+            "name": "vs2019-release",
+            "configurePreset": "vs2019",
+            "configuration": "Release"
+        }
+    ]
+  }
