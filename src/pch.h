@@ -8,7 +8,6 @@
 #include <array>
 #include <map>
 #include <cmath>
-#include <winerror.h>
 
 // OpenGL core
 #include <glad/glad.h>

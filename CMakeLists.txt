@@ -42,6 +42,7 @@ message(STATUS "Adding Dear ImGui files...")
 
 set(SOURCES 
     src/main.cpp
+    src/Application.cpp
     src/CommonGeometry.cpp
     src/CubeGeometry.cpp
     src/OrbitalCamera.cpp
@@ -52,6 +53,7 @@ set(SOURCES
 set(HEADERS
     src/CommonGeometry.h
     src/CubeGeometry.h
+    src/Application.h
     src/OrbitalCamera.h
     src/ShaderProgram.h
     src/utils.h

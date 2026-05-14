@@ -16,6 +16,8 @@ CubeGeometry::CubeGeometry()
 
 CubeGeometry::~CubeGeometry()
 {
+
+    std::cout << "cube geometry delete" << "\n";
     glDeleteVertexArrays(1, &m_cube_vao);
     glDeleteBuffers(1, &m_cube_vbo);
 }

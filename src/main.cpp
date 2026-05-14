@@ -2,12 +2,23 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
+#include <Application.h>
+
 #include <ShaderProgram.h>
 #include <CubeGeometry.h>
 #include <OrbitalCamera.h>
 
 void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
+int NewEndpoint();
+
+/*
+    Application - orchestrator, 
+    Window/GlfwWin wrapper
+    - Docker window
+        - Imgui Widgety
+
+*/
 
 float last_mouse_x = 10.0f;
 float last_mouse_y = 10.0f;
@@ -40,7 +51,7 @@ int main() {
     std::cout << "GLFW initialized successfully!\n";
     std::cout << "GLFW version: " << glfwGetVersionString() << "\n";
 
-    const int glfw_width = 800;
+    const int glfw_width = 1800;
     const int glfw_height = 600;
 
     GLFWwindow* window = glfwCreateWindow(glfw_width, glfw_height, "Veggen", nullptr, nullptr);
@@ -53,6 +64,7 @@ int main() {
 
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1); // Enable vsync
+    //Mozno prepisat na anonymnu [](GLFWwindow * window, int width, int height) { Framebuff...code }
     glfwSetFramebufferSizeCallback(window, FramebufferSizeCallback);
 
 
@@ -115,7 +127,7 @@ int main() {
     glEnable(GL_DEPTH_TEST);
 
     ShaderProgram basic_shader({ "DefaultShader.vert", "DefaultShader.frag" });
-    CubeGeometry cube_mesh = CubeGeometry::GetCubeGeometry();
+    CubeGeometry &cube_mesh = CubeGeometry::GetCubeGeometry();
 
     OrbitalCamera o_camera = OrbitalCamera(0.0, 0.0, 4.0, glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
 
@@ -232,6 +244,8 @@ int main() {
         //GLint viewpor[4];
         //glGetIntegerv(GL_VIEWPORT, viewport);
 
+        // pridaj osetrenie
+        // ako float aspect = (viewport_size.y > 0.0f) ? viewport_size.x / viewport_size.y : 1.0f;
         float aspect = viewport_size.x / viewport_size.y;
 
         // Render();
@@ -383,4 +397,20 @@ void FramebufferSizeCallback(GLFWwindow* window, int width, int height)
     // height will be significantly larger than specified on retina displays.
     printf("Window resized to: %dx%d\n", width, height);
     glViewport(0, 0, width, height);
+}
+
+int NewEndpoint() 
+{
+    Application veggenApp;
+
+    if (!veggenApp.Init(1280, 720, "Veggen"))
+    {
+        std::cerr << "Failed to initialize application" << std::endl;
+        return -1;
+    }
+
+    veggenApp.Run();
+    veggenApp.Shutdown();
+
+    return 0;
 }

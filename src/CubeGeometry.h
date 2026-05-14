@@ -2,6 +2,12 @@
 class CubeGeometry
 {
 public:
+	// Zakazanie copy konstruktoru a priradenia, kvoli singletonu
+	// Riesenie problemu dvojteho uvolnenia v pripade:
+	// Zle - CubeGeometry cube_mesh = CubeGeometry::GetCubeGeometry();
+	// Dobre - CubeGeometry& cube_mesh = CubeGeometry::GetCubeGeometry();
+	CubeGeometry(const CubeGeometry&) = delete;
+	CubeGeometry& operator=(const CubeGeometry&) = delete;
 	CubeGeometry();
 	~CubeGeometry();
 	static CubeGeometry& GetCubeGeometry();

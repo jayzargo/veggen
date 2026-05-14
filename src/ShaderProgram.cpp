@@ -12,7 +12,7 @@ ShaderProgram::ShaderProgram(const std::vector<std::string> &shader_path_list)
 		GLuint shader = glCreateShader(gl_shader_type);
 		std::vector<char> shader_source;
 
-		if (LoadShader(shader_path_list[i], shader_source) == S_OK)
+		if (LoadShader(shader_path_list[i], shader_source))
 		{
 			const char* tmp = static_cast<const char*>(&shader_source[0]);
 			glShaderSource(shader, 1, &tmp, nullptr);
@@ -39,10 +39,10 @@ int ShaderProgram::LoadShader(const std::string& file_name, std::vector<char>& s
 	{
 		printf("IO error: File '%s' not found.\n", file_name.c_str());
 
-		return S_FALSE;
+		return false;
 	}
 
-	int result = S_FALSE;
+	int result = false;
 
 	const size_t file_size = static_cast<size_t>(GetFileSize64(file_name.c_str()));
 
@@ -71,7 +71,7 @@ int ShaderProgram::LoadShader(const std::string& file_name, std::vector<char>& s
 		else
 		{
 			printf("Shader file '%s' loaded successfully.\n", file_name.c_str());
-			result = S_OK;
+			result = true;
 		}
 	}
 
@@ -103,13 +103,9 @@ GLint ShaderProgram::CheckShader(const GLenum shader)
 	{
 		int info_length = 0;
 		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &info_length);
-		char* info_log = new char[info_length];
-		memset(info_log, 0, sizeof(*info_log) * info_length);
-		glGetShaderInfoLog(shader, info_length, &info_length, info_log);
-
-		printf("Error log: %s\n", info_log);
-
-		SAFE_DELETE_ARRAY(info_log);
+		std::vector<char> info_log(info_length);
+		glGetShaderInfoLog(shader, info_length, &info_length, info_log.data());
+		printf("Error log: %s\n", info_log.data());
 	}
 
 	return status;
@@ -130,13 +126,9 @@ GLint ShaderProgram::CheckProgramLinking()
 
 		// Param info length - konkretna dlzka infa - ak nechceme len hardcoded 512/1024 buffer
 		glGetProgramiv(m_program_id, GL_INFO_LOG_LENGTH, &info_length);
-		char* info_log = new char[info_length];
-		memset(info_log, 0, sizeof(*info_log) * info_length);
-		glGetProgramInfoLog(m_program_id, info_length, &info_length, info_log);
-
-		printf("Error log: %s\n", info_log);
-
-		SAFE_DELETE_ARRAY(info_log);
+		std::vector<char> info_log(info_length);
+		glGetProgramInfoLog(m_program_id, info_length, &info_length, info_log.data());
+		printf("Error log: %s\n", info_log.data());
 	}
 
 	return status;
