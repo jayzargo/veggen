@@ -15,8 +15,8 @@ git submodule update --init --recursive
 Zatial staci ist do korena a spustit:
 
 ```
-cmake --presets vs2022
-cmake --build --presets <vs2022-debug|vs2022-release>
+cmake --preset vs2022
+cmake --build --preset <vs2022-debug|vs2022-release>
 ```
 
 Alebo bez cmake presets:
