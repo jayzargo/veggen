@@ -1,6 +1,13 @@
 #pragma once
 
 namespace CommonGeometry {
+    struct Vertex
+    {
+        glm::vec3 position;
+        glm::vec3 normal;
+        glm::vec2 uv;
+    };
+
     constexpr float cube_vertices[108] = {
         -1.0f,  1.0f, -1.0f,
         -1.0f, -1.0f, -1.0f,

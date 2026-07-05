@@ -48,6 +48,7 @@ set(SOURCES
     src/OrbitalCamera.cpp
     src/ShaderProgram.cpp
     src/utils.cpp
+    src/SphereGeometry.cpp
 )
 
 set(HEADERS
@@ -58,6 +59,8 @@ set(HEADERS
     src/ShaderProgram.h
     src/utils.h
     src/pch.h
+    src/OrientedParticle.h
+    src/SphereGeometry.h
 )
 
 file(GLOB IMGUI_SRC

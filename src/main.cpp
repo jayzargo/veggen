@@ -6,6 +6,7 @@
 
 #include <ShaderProgram.h>
 #include <CubeGeometry.h>
+#include <SphereGeometry.h>
 #include <OrbitalCamera.h>
 
 void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
@@ -85,6 +86,8 @@ int main() {
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
     io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+    
+    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     //io.IniFilename = NULL;
 
     // Setup Platform/Renderer bindings
@@ -127,7 +130,10 @@ int main() {
     glEnable(GL_DEPTH_TEST);
 
     ShaderProgram basic_shader({ "DefaultShader.vert", "DefaultShader.frag" });
+    
     CubeGeometry &cube_mesh = CubeGeometry::GetCubeGeometry();
+
+    SphereGeometry& sphere_mesh = SphereGeometry::GetSphereGeometry(16,16);
 
     OrbitalCamera o_camera = OrbitalCamera(0.0, 0.0, 4.0, glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
 
@@ -158,7 +164,6 @@ int main() {
         ImGui::SetNextWindowPos(viewport->Pos);
         ImGui::SetNextWindowSize(viewport->Size);
         ImGui::SetNextWindowViewport(viewport->ID);
-
 
         // 'Virtualne' dockovacie okno/widget - nastavenia
         ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar
@@ -201,10 +206,13 @@ int main() {
         ImGui::End();
 
         // Dockable imgui widgets
+        
         ImGui::Begin("Scene 1");
         ImGui::Text("GameObject 1");
         ImGui::Text("GameObject 2");
         ImGui::Text("GameObject 3");
+        ImGui::Button("Button 1");
+        ImGui::Button("Button 2");
         ImGui::End();
         
         ImGui::Begin("Scene 2");
@@ -256,14 +264,21 @@ int main() {
         glm::mat4 projection = glm::mat4(1.0f);
         
         view = o_camera.GetViewMatrix();
-        model = glm::scale(model, glm::vec3(0.5f));
+        model = glm::scale(model, glm::vec3(0.5f,1.0f,0.15f));
         projection = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 100.0f);
 
         glm::mat4 mvp = projection * view * model;
 
         basic_shader.use();
         basic_shader.UniformSetMatrix4x4(&mvp[0][0], "mvp");
+
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
+        // CCW??
+        glFrontFace(GL_CW);
+
         cube_mesh.Draw();
+        //sphere_mesh.Draw();
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         ImGui::Image((void*)(intptr_t)main_viewport_tex, viewport_size, ImVec2(0, 1), ImVec2(1, 0));
@@ -382,6 +397,10 @@ int main() {
 
     glfwDestroyWindow(window);
     glfwTerminate();
+
+    // Test endpoint
+    NewEndpoint();
+
     return 0;
 }
 

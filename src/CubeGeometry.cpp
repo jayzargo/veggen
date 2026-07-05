@@ -12,12 +12,13 @@ CubeGeometry::CubeGeometry()
     glBufferData(GL_ARRAY_BUFFER, sizeof(CommonGeometry::cube_vertices), &CommonGeometry::cube_vertices, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+
+    glBindVertexArray(0);
 }
 
 CubeGeometry::~CubeGeometry()
 {
-
-    std::cout << "cube geometry delete" << "\n";
+    std::cout << "cube geometry deleted" << "\n";
     glDeleteVertexArrays(1, &m_cube_vao);
     glDeleteBuffers(1, &m_cube_vbo);
 }
