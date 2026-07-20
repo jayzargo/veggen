@@ -9,6 +9,8 @@
 #include <SphereGeometry.h>
 #include <OrbitalCamera.h>
 
+#include <OrientedParticle.h>
+
 void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow* window);
 int NewEndpoint();
@@ -137,6 +139,36 @@ int main() {
 
     OrbitalCamera o_camera = OrbitalCamera(0.0, 0.0, 4.0, glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
 
+    int temp_angle = 0;
+
+
+    // HERE rope simulation init - init particle chain
+    float spacing = 0.3f;
+    std::vector<OrientedParticle> particle_chain;
+
+    for (int i = 0; i < 7; i++) {
+        OrientedParticle particle;
+
+        // init values
+        particle.m_c_position = glm::vec3(0.0f, 1.0f - i * spacing, 0.0f);
+        particle.m_c_orientation = glm::quat(1, 0, 0, 0);
+
+        particle.m_r_position = particle.m_c_position;
+        particle.m_r_orientation = particle.m_c_orientation;
+
+        particle.m_p_position = particle.m_c_position;
+        particle.m_p_orientation = particle.m_c_orientation;
+
+        particle.m_lin_velocity = glm::vec3(0, 0, 0);
+        particle.m_ang_velocity = glm::vec3(0, 0, 0);
+
+        particle.m_mass = 0.1f;
+        particle.m_radii = glm::vec3(0.1f, 0.2f, 0.1f);
+
+        particle_chain.push_back(particle);
+    }
+
+
     // Render loop
     while (!glfwWindowShouldClose(window))
     {
@@ -257,29 +289,36 @@ int main() {
         float aspect = viewport_size.x / viewport_size.y;
 
         // Render();
-        basic_shader.use();
+        temp_angle++;
+        temp_angle = (temp_angle) % 360;
 
-        glm::mat4 model = glm::mat4(1.0f);
-        glm::mat4 view = glm::mat4(1.0f);
-        glm::mat4 projection = glm::mat4(1.0f);
+        for (auto op : particle_chain) {
+
+            glm::mat4 model = glm::mat4(1.0f);
+            glm::mat4 view = glm::mat4(1.0f);
+            glm::mat4 projection = glm::mat4(1.0f);
         
-        view = o_camera.GetViewMatrix();
-        model = glm::scale(model, glm::vec3(0.5f,1.0f,0.15f));
-        projection = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 100.0f);
+            view = o_camera.GetViewMatrix();
 
-        glm::mat4 mvp = projection * view * model;
+            model = glm::translate(model, op.m_c_position);
+            model *= glm::mat4_cast(op.m_c_orientation);
+            model = glm::scale(model, op.m_radii);
 
-        basic_shader.use();
-        basic_shader.UniformSetMatrix4x4(&mvp[0][0], "mvp");
+            projection = glm::perspective(glm::radians(45.0f), aspect, 0.1f, 100.0f);
+            glm::mat4 mvp = projection * view * model;
 
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
-        // CCW??
-        glFrontFace(GL_CW);
+            basic_shader.use();
+            basic_shader.UniformSetMatrix4x4(&mvp[0][0], "mvp");
 
-        cube_mesh.Draw();
-        //sphere_mesh.Draw();
+            glEnable(GL_CULL_FACE);
+            glCullFace(GL_BACK);
+            // CCW??
+            glFrontFace(GL_CW);
 
+            //cube_mesh.Draw();
+            sphere_mesh.Draw();
+        }
+        
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         ImGui::Image((void*)(intptr_t)main_viewport_tex, viewport_size, ImVec2(0, 1), ImVec2(1, 0));
         

@@ -7,7 +7,9 @@ public:
 	OrientedParticle();
 	~OrientedParticle();
 
-private:
+	void init();
+
+public:
 	// mass and radius {a,b,c}
 	float m_mass;
 	glm::vec3 m_radii;
@@ -28,11 +30,3 @@ private:
 	glm::vec3 m_lin_velocity;
 	glm::vec3 m_ang_velocity;
 };
-
-OrientedParticle::OrientedParticle()
-{
-}
-
-OrientedParticle::~OrientedParticle()
-{
-}
