@@ -49,6 +49,7 @@ set(SOURCES
     src/ShaderProgram.cpp
     src/utils.cpp
     src/SphereGeometry.cpp
+    src/OrientedParticle.cpp
 )
 
 set(HEADERS
