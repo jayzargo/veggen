@@ -146,7 +146,7 @@ int main() {
     float spacing = 0.3f;
     std::vector<OrientedParticle> particle_chain;
 
-    for (int i = 0; i < 7; i++) {
+    for (int i = 0; i < 3; i++) {
         OrientedParticle particle;
 
         // init values
@@ -160,7 +160,7 @@ int main() {
         particle.m_p_orientation = particle.m_c_orientation;
 
         particle.m_lin_velocity = glm::vec3(0, 0, 0);
-        particle.m_ang_velocity = glm::vec3(0, 0, 0);
+        particle.m_ang_velocity = glm::vec3(0, 0, 2.0f);
 
         particle.m_mass = 0.1f;
         particle.m_radii = glm::vec3(0.1f, 0.2f, 0.1f);
@@ -168,15 +168,16 @@ int main() {
         particle_chain.push_back(particle);
     }
 
+    float lastFrameTime = (float)glfwGetTime();
 
     // Render loop
     while (!glfwWindowShouldClose(window))
     {
-        // Poll and handle events (inputs, window resize, etc.)
-               // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
-               // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application, or clear/overwrite your copy of the mouse data.
-               // - When io.WantCaptureKeyboard is true, do not dispatch keyboard input data to your main application, or clear/overwrite your copy of the keyboard data.
-               // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
+        // Delta time add
+        float currFrameTime = (float)glfwGetTime();
+        float dt = currFrameTime - lastFrameTime;
+        lastFrameTime = currFrameTime;
+
         glfwPollEvents();
         // If minimalized
         if (glfwGetWindowAttrib(window, GLFW_ICONIFIED) != 0)
@@ -240,9 +241,8 @@ int main() {
         // Dockable imgui widgets
         
         ImGui::Begin("Scene 1");
-        ImGui::Text("GameObject 1");
-        ImGui::Text("GameObject 2");
-        ImGui::Text("GameObject 3");
+        ImGui::Text("FPS: %.1f", 1.0f / dt);
+        ImGui::Text("Frame time: %.3f ms", dt * 1000.0f);
         ImGui::Button("Button 1");
         ImGui::Button("Button 2");
         ImGui::End();
@@ -287,6 +287,49 @@ int main() {
         // pridaj osetrenie
         // ako float aspect = (viewport_size.y > 0.0f) ? viewport_size.x / viewport_size.y : 1.0f;
         float aspect = viewport_size.x / viewport_size.y;
+
+        // ===== PREDIKCIA =====
+        for (int i = 0; i < particle_chain.size(); i++) {
+            auto& p = particle_chain[i];
+            
+            p.m_lin_velocity += glm::vec3(0.0f, -9.81f, 0.0f) * dt;
+            p.m_p_position = p.m_c_position + p.m_lin_velocity * dt;
+            float omegaLen = glm::length(p.m_ang_velocity);
+            if (omegaLen > 0.0001f) {
+                float halfAngle = omegaLen * dt * 0.5f;
+                glm::vec3 axis = p.m_ang_velocity / omegaLen;
+                glm::quat deltaRot = glm::quat(
+                    cos(halfAngle),
+                    axis.x * sin(halfAngle),
+                    axis.y * sin(halfAngle),
+                    axis.z * sin(halfAngle)
+                );
+                p.m_p_orientation = deltaRot * p.m_c_orientation;
+            }
+            else {
+                p.m_p_orientation = p.m_c_orientation;
+            }
+        }
+
+        // ===== INTEGRÁCIA =====
+        for (int i = 0; i < particle_chain.size(); i++) {
+            auto& p = particle_chain[i];
+
+            p.m_lin_velocity = (p.m_p_position - p.m_c_position) / dt;
+            p.m_c_position = p.m_p_position;
+
+            glm::quat r = p.m_p_orientation * glm::inverse(p.m_c_orientation);
+            if (r.w < 0) r = -r;
+            float angle = glm::angle(r);
+            if (angle > 0.0001f) {
+                p.m_ang_velocity = glm::axis(r) * angle / dt;
+            }
+            else {
+                p.m_ang_velocity = glm::vec3(0.0f);
+            }
+            p.m_c_orientation = p.m_p_orientation;
+        }
+
 
         // Render();
         temp_angle++;
