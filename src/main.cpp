@@ -165,8 +165,13 @@ int main() {
         particle.m_mass = 0.1f;
         particle.m_radii = glm::vec3(0.1f, 0.2f, 0.1f);
 
+        particle.m_fixed = false;
+
         particle_chain.push_back(particle);
     }
+
+    // fixed particle
+    particle_chain[0].m_fixed = true;
 
     float lastFrameTime = (float)glfwGetTime();
 
@@ -177,6 +182,8 @@ int main() {
         float currFrameTime = (float)glfwGetTime();
         float dt = currFrameTime - lastFrameTime;
         lastFrameTime = currFrameTime;
+
+        if (dt > 0.033f) dt = 0.033f;
 
         glfwPollEvents();
         // If minimalized
@@ -291,6 +298,12 @@ int main() {
         // ===== PREDIKCIA =====
         for (int i = 0; i < particle_chain.size(); i++) {
             auto& p = particle_chain[i];
+
+            if (p.m_fixed) {
+                p.m_p_position = p.m_c_position;
+                p.m_p_orientation = p.m_c_orientation;
+                continue;
+            }
             
             p.m_lin_velocity += glm::vec3(0.0f, -9.81f, 0.0f) * dt;
             p.m_p_position = p.m_c_position + p.m_lin_velocity * dt;
@@ -314,6 +327,7 @@ int main() {
         // ===== INTEGRÁCIA =====
         for (int i = 0; i < particle_chain.size(); i++) {
             auto& p = particle_chain[i];
+            if (p.m_fixed) continue;
 
             p.m_lin_velocity = (p.m_p_position - p.m_c_position) / dt;
             p.m_c_position = p.m_p_position;

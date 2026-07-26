@@ -29,4 +29,7 @@ public:
 	// velocities
 	glm::vec3 m_lin_velocity;
 	glm::vec3 m_ang_velocity;
+
+	// dummy info
+	bool m_fixed;
 };
