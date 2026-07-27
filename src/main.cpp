@@ -172,6 +172,9 @@ int main() {
 
     // fixed particle
     particle_chain[0].m_fixed = true;
+    particle_chain[1].m_lin_velocity = glm::vec3(2.0f, -0.32f, 0.0f);
+    particle_chain[1].m_ang_velocity = glm::vec3(0.0f, 0.0f, 3.0f);
+    particle_chain[2].m_ang_velocity = glm::vec3(1000.0f, 1000.0f, 10.0f);
 
     float lastFrameTime = (float)glfwGetTime();
 
@@ -184,6 +187,9 @@ int main() {
         lastFrameTime = currFrameTime;
 
         if (dt > 0.033f) dt = 0.033f;
+
+        // debug purposes - slowing down the simulation
+        //dt *= 0.1f;
 
         glfwPollEvents();
         // If minimalized
@@ -317,7 +323,8 @@ int main() {
                     axis.y * sin(halfAngle),
                     axis.z * sin(halfAngle)
                 );
-                p.m_p_orientation = deltaRot * p.m_c_orientation;
+                // cumulative multiplication - floating point error could disturb ortonormality
+                p.m_p_orientation = glm::normalize(deltaRot * p.m_c_orientation);
             }
             else {
                 p.m_p_orientation = p.m_c_orientation;
@@ -341,7 +348,7 @@ int main() {
             else {
                 p.m_ang_velocity = glm::vec3(0.0f);
             }
-            p.m_c_orientation = p.m_p_orientation;
+            p.m_c_orientation = glm::normalize(p.m_p_orientation);
         }
 
 
