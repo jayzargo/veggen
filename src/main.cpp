@@ -173,8 +173,9 @@ int main() {
     // fixed particle
     particle_chain[0].m_fixed = true;
     particle_chain[1].m_lin_velocity = glm::vec3(2.0f, -0.32f, 0.0f);
-    particle_chain[1].m_ang_velocity = glm::vec3(0.0f, 0.0f, 3.0f);
-    particle_chain[2].m_ang_velocity = glm::vec3(1000.0f, 1000.0f, 10.0f);
+    particle_chain[1].m_ang_velocity = glm::vec3(4.0f, 0.0f, 0.0f);
+    //particle_chain[2].m_ang_velocity = glm::vec3(1000.0f - 259, 1000.0f - 259, 10.0f);
+    particle_chain[2].m_ang_velocity = glm::vec3(0.0f, 6.28f, 6.28f);
 
     float lastFrameTime = (float)glfwGetTime();
 
@@ -342,11 +343,17 @@ int main() {
             glm::quat r = p.m_p_orientation * glm::inverse(p.m_c_orientation);
             if (r.w < 0) r = -r;
             float angle = glm::angle(r);
+
+            if (i == 2) {
+                printf("omega before: %.4f %.4f %.4f | angle: %.8f\n",p.m_ang_velocity.x, p.m_ang_velocity.y, p.m_ang_velocity.z, angle);
+            }
+
             if (angle > 0.0001f) {
                 p.m_ang_velocity = glm::axis(r) * angle / dt;
             }
             else {
-                p.m_ang_velocity = glm::vec3(0.0f);
+                //p.m_ang_velocity = glm::vec3(0.0f);
+                p.m_ang_velocity = p.m_ang_velocity;
             }
             p.m_c_orientation = glm::normalize(p.m_p_orientation);
         }
