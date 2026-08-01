@@ -23,6 +23,13 @@ int NewEndpoint();
 
 */
 
+// TODO: review kodu - ci vzorec matchuje implementaciu, adresovat chybajuce veci, upravit
+// TODO: pridat debug osi - aby som videl orientacie castic pri pohybe
+// TODO: reviewnut + pozriet na nete ako funguje a kooperuje delta_time pocas simulacie, aby sme mali dobre stepy
+// + pozriet ako "spomalit simulaciu" aby nedoslo k scenaru kedy castica ma vacsiu rychlost vplyvom zmensenia/zvacsenia casoveho kroku
+// debug 30 fps - release 60 fps
+// TODO: zatial nie je implementovany shape matching - takze treba prilozit toto ako constraint, a pokusit sa udrzat celu retaz
+
 float last_mouse_x = 10.0f;
 float last_mouse_y = 10.0f;
 bool first_mouse = true;
